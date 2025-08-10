@@ -203,3 +203,14 @@ The MESA risk calculator has been validated in multiple populations and shows im
 - **High Risk**: >20% 10-year CHD risk
 
 The incorporation of CAC scoring helps reclassify patients from intermediate risk categories into more appropriate risk stratification for clinical decision-making.
+
+## Implementation Validation
+
+This calculator implementation has been validated against the published MESA coefficients through:
+
+- **Manual Test Suite**: 25 comprehensive patient scenarios with expected results (`MANUAL-TESTS/`)
+- **Coefficient Verification**: Direct validation against published MESA study values
+- **Clinical Range Testing**: Edge cases and parameter validation for medical accuracy
+- **Multi-Ethnic Testing**: Verification of ethnicity-specific risk adjustments
+
+For testing details and validation procedures, see the project's `README.md` and `CLAUDE.md` documentation.
