@@ -1,3 +1,7 @@
+/**
+ * Returns default form data structure with sensible defaults for MESA risk calculation
+ * @returns {Object} Default form data object with all required fields
+ */
 export const getDefaultFormData = () => ({
   gender: "",
   age: 65,
@@ -16,6 +20,11 @@ export const getDefaultFormData = () => ({
   hypertensionMedication: ""
 });
 
+/**
+ * Parses URL query parameters and returns form data with validated values
+ * Supports multiple parameter name variations for flexibility
+ * @returns {Object} Parsed form data object with validated values
+ */
 export const parseQueryParams = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const defaults = getDefaultFormData();
@@ -58,6 +67,11 @@ export const parseQueryParams = () => {
   }
 
   // Parse yes/no fields
+  /**
+   * Helper function to parse boolean-like URL parameters
+   * @param {string} param - Parameter name to parse
+   * @returns {string} 'yes', 'no', or empty string
+   */
   const parseBooleanField = (param) => {
     const value = urlParams.get(param);
     if (value) {

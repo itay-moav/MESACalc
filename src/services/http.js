@@ -1,10 +1,14 @@
 import axios from "axios";
 import log from "./log";
 
-//Set this up on init if u want some actions done on 401/403 responses
-let logoutCallback = null;
-export const setLogoutCallback = i_logoutCallback => logoutCallback = i_logoutCallback;
+/**
+ * HTTP service module providing axios configuration and interceptors
+ * Handles network errors and API communication for MESA risk calculator
+ */
 
+/**
+ * Axios response interceptor for handling network and server errors
+ */
 axios.interceptors.response.use(null, error => {
   const expectedError =
     error.response &&
@@ -12,66 +16,64 @@ axios.interceptors.response.use(null, error => {
     error.response.status <= 500;
 
   if (!expectedError) {
-    if(error.code === "ERR_NETWORK"){ //Probably outside the network
-      log.fatal("This app is available only inside the netwrok!");
+    if(error.code === "ERR_NETWORK") {
+      log.fatal("Network connection error - please check your internet connection");
       throw new Error("ERR_NETWORK");
     } else {
-      log.error('Axios response error',error);
+      log.error('Axios response error', error);
       throw new Error(error);
     }
   }
-  //
-  // TODO - NEED TO REVISIT THIS PLACE SOON FOR BETTER ERROR HANDLING 
-  //
-  if(error && error.response && error.response.status){//not authorized - login out
+
+  if(error && error.response && error.response.status) {
     console.error(error.response);
-    // TODO SILENCED UNTIL I DECIDE WHAT TO DO HERE  || error.response.status === 500
-    if(error.response.status === 401){
-        logoutCallback && logoutCallback();
-    }
-    if(error.response.status === 403){
-      window.alert("You have tried to access the Forbidden Forest!");
-      window.history.back();
-    }
   }
   return Promise.reject(error);
 });
 
-function setJwt(jwt) {
-  axios.defaults.headers.common["x-auth-token"] = jwt;
-}
-
+/**
+ * Sets the API base URL for all axios requests
+ * @param {string} app_url - The base URL for API calls
+ */
 export function setAppApiRootUrl(app_url) {
   axios.defaults.baseURL = app_url;
   log.debug("APP api root url: ", axios.defaults.baseURL);
 }
 
+/**
+ * Gets the current API base URL
+ * @returns {string} The current API base URL
+ */
 export function getApiRootUrl(){
   return axios.defaults.baseURL;
 }
 
- const http = {
+/**
+ * HTTP client object with axios methods
+ */
+const http = {
   get: axios.get,
   post: axios.post,
   put: axios.put,
   patch: axios.patch,
-  delete: axios.delete,
-  setJwt
+  delete: axios.delete
 };
 
 export default http;
 
 /**
- * Wrapps a response from a TalisAPI call and check it is not an internal PHP error, which does not reflect as 500
- * @param {*} response 
- * @param {*} callback 
+ * Wrapper function for API responses to validate status codes
+ * @param {Object} response - HTTP response object
+ * @param {Function} callback - Callback function to process valid responses
+ * @returns {*} Result of callback function
+ * @throws {Error} Throws error for invalid response status codes
  */
-export function fastApiWrapper(response,callback){
-  log.debug("Response from FastAPI:",response);
+export function fastApiWrapper(response, callback){
+  log.debug("API Response:", response);
 
-  //TODO HEre u can add special status handlers (like 500, 404, 403 etc)
-  if(!response.status || response.status>299 || response.status<200){
-    console.error('fastApiWrapper error',response);
+  // Check if response status is in valid range (200-299)
+  if(!response.status || response.status > 299 || response.status < 200){
+    console.error('API response error', response);
     throw new Error(response);    
   }
 
@@ -79,16 +81,21 @@ export function fastApiWrapper(response,callback){
 }
 
 /**
- * Wraps an API call with all error handling functionality
- * 
- * @param {*} myPromise 
- * @param {*} successCallback 
- * @param {*} errorCallback 
+ * Wraps an API call with comprehensive error handling and response processing
+ * @param {Promise} myPromise - The API promise to handle
+ * @param {Function} successCallback - Function to call on successful response
+ * @param {Function} errorCallback - Function to call on error
+ * @param {Function} [finallyCallback=null] - Optional function to call after completion
  */
-export function responsePromiseChainHandler(myPromise,successCallback,errorCallback,finallyCallback=null){
+export function responsePromiseChainHandler(myPromise, successCallback, errorCallback, finallyCallback = null){
   if(finallyCallback){
-    myPromise.then(response=>fastApiWrapper(response,successCallback)).catch(errorCallback).finally(finallyCallback);
+    myPromise
+      .then(response => fastApiWrapper(response, successCallback))
+      .catch(errorCallback)
+      .finally(finallyCallback);
   } else {
-    myPromise.then(response=>fastApiWrapper(response,successCallback)).catch(errorCallback);
+    myPromise
+      .then(response => fastApiWrapper(response, successCallback))
+      .catch(errorCallback);
   }
 }

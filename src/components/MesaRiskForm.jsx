@@ -9,6 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Heart, Calculator, BarChart3 } from "lucide-react";
 
+/**
+ * Main form component for the MESA CHD Risk Calculator
+ * Renders the complete user interface including form fields and results display
+ * @param {Object} props - Component props
+ * @param {Object} props.formData - Current form data values
+ * @param {Function} props.updateFormData - Function to update form data
+ * @param {boolean} props.showResults - Whether to show calculation results
+ * @param {Object} props.riskResults - Calculated risk results
+ * @param {Function} props.onCalculate - Function to trigger risk calculation
+ * @param {Function} props.onStartOver - Function to reset the form
+ * @returns {JSX.Element} The MESA risk form component
+ */
 export default function MesaRiskForm({ 
   formData, 
   updateFormData, 

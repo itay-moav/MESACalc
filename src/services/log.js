@@ -1,8 +1,13 @@
-import http from "./http";
+/**
+ * Logging service for the MESA Risk Calculator application
+ * Provides configurable logging with multiple handlers and levels
+ */
 
-//TODO let logBuffer = [];
 let logFunction = NaN;
 
+/**
+ * Log level constants for filtering messages
+ */
 const LEVEL = {
   DEBUG: 0,
   INFO:  1,
@@ -11,50 +16,39 @@ const LEVEL = {
   FATAL: 4
 };
 
+/**
+ * Available log handlers for different output destinations
+ */
 const HANDLER = {
   CONSOLE: (...someMixedValues) => {
     console.log(...someMixedValues);
-  },
-  /*     TODO
-  TALIS:  (...someMixedValues) => {
-    http.post('/log/message',someMixedValues);
-  }*/
-  /* ,   TODO
-  TALIS_BUFFERED:  (...someMixedValues) => {
-    logBuffer.push(someMixedValues);
-    if(logBuffer.length > 10){
-      http.post('/log/message',{logEntries:logBuffer});
-      logBuffer = [];
-    }
-  },*/
-  /*     TODO
-  LAMBDA:  (...someMixedValues) => {
-    console.log(...someMixedValues);
-  }*/
+  }
 };
 
+/**
+ * Sets the minimum log level for filtering messages
+ * @param {number} log_level - Minimum level (0-4) to log
+ */
 function setLogLevel(log_level){
-  localStorage.setItem('bhDebugLevel',log_level);
+  localStorage.setItem('bhDebugLevel', log_level);
 }
 
+/**
+ * Sets the log handler function for output destination
+ * @param {string} logHandler - Handler name (e.g., 'CONSOLE')
+ */
 function setLogHandler(logHandler){
-  console.log('Setup log function',logHandler);
+  console.log('Setup log function', logHandler);
   logFunction = HANDLER[logHandler];
 }
-
-/*TODO
-function flushBuffer(){
-  if(logBuffer.length>0){
-     http.post('/log/message',{logEntries:logBuffer});
-  }
-  logBuffer = [];
-}
-*/
 /**
- * Either going by log level, or in case emergency flag, log EVERYTHING to console.
+ * Core logging function that filters messages by level or emergency debug mode
+ * @param {number} message_log_level - Level of the message being logged
+ * @param {...any} someMixedValues - Values to log
  */
-function logger(message_log_level,...someMixedValues) {
+function logger(message_log_level, ...someMixedValues) {
   const debugMode = localStorage.getItem('bhDebugMode');
+  // Emergency debug mode logs everything
   if(debugMode && debugMode === 'cef8d978-169e-4759-bddf-18b06007f11e'){
       console.log(...someMixedValues);
   } else {
@@ -63,33 +57,56 @@ function logger(message_log_level,...someMixedValues) {
         try{
           logFunction(...someMixedValues);
         } catch(error){
-          console.fatal("We had an issue using the log module. Writing to console.");
+          console.error("Log module error - falling back to console:", error);
           console.log(...someMixedValues);
         }
       }
   }
 }
 
+/**
+ * Logs debug level messages
+ * @param {...any} someMixedValues - Values to log
+ */
 function debug(...someMixedValues){
-  logger(LEVEL.DEBUG,...someMixedValues);
+  logger(LEVEL.DEBUG, ...someMixedValues);
 }
 
+/**
+ * Logs info level messages
+ * @param {...any} someMixedValues - Values to log
+ */
 function info(...someMixedValues){
-  logger(LEVEL.INFO,...someMixedValues);
+  logger(LEVEL.INFO, ...someMixedValues);
 }
 
+/**
+ * Logs warning level messages
+ * @param {...any} someMixedValues - Values to log
+ */
 function warning(...someMixedValues){
-  logger(LEVEL.WARNING,...someMixedValues);
+  logger(LEVEL.WARNING, ...someMixedValues);
 }
 
+/**
+ * Logs error level messages
+ * @param {...any} someMixedValues - Values to log
+ */
 function error(...someMixedValues){
-  logger(LEVEL.ERROR,...someMixedValues);
+  logger(LEVEL.ERROR, ...someMixedValues);
 }
 
+/**
+ * Logs fatal level messages
+ * @param {...any} someMixedValues - Values to log
+ */
 function fatal(...someMixedValues){
-  logger(LEVEL.FATAL,...someMixedValues);
+  logger(LEVEL.FATAL, ...someMixedValues);
 }
 
+/**
+ * Main log object with all logging functionality
+ */
 const log = {
   LEVEL,
   HANDLER,
@@ -97,7 +114,6 @@ const log = {
     setLogHandler,
     setLogLevel        
   },
-  //TODO flushBuffer,
   debug,
   info,
   warning,
